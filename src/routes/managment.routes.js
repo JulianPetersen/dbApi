@@ -9,10 +9,9 @@ import managment from "../models/managment";
 
 router.post('/',[authJwt.verifyToken,authJwt.isAdminOrModerator], managmentCtrl.createManagment);
 router.get('/', [authJwt.verifyToken,authJwt.isAdminOrModerator], managmentCtrl.getAllManagments)
-router.get('/checkManagmentToday',[authJwt.verifyToken,authJwt.isAdminOrModerator], managmentCtrl.checkManagmentToday)
-router.get('/checkManagmentActive', [authJwt.verifyToken,authJwt.isAdminOrModerator], managmentCtrl.checkManagmentActive)
+
 router.get('/:id', [authJwt.verifyToken,authJwt.isAdminOrModerator], managmentCtrl.getManagmentById)
 router.delete('/:id', [authJwt.verifyToken,authJwt.isAdminOrModerator], managmentCtrl.deleteManagment)
-
+router.put('/:id',[authJwt.verifyToken,authJwt.isAdminOrModerator], managmentCtrl.closeManagment)
 
 export default router  
