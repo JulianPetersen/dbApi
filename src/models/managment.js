@@ -16,7 +16,7 @@ const managmentSchema = new Schema({
 
     },
     totalHours:{
-        type:Number,
+        type:Number,    
         default:0
     },
     date:{

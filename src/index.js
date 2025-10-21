@@ -8,7 +8,8 @@ import cors from 'cors'
 //routes
 import authRoutes from './routes/auth.routes.js';
 import managmentRoutes from './routes/managment.routes.js'
-
+import cashMovementRoutes from './routes/cashMovement.routes.js'
+import cashRegister from './routes/cashRegister.routes.js'
 dotenv.config();
 
 const app = express();
@@ -35,3 +36,5 @@ app.get('/', (req,res)=> {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/managment', managmentRoutes);
+app.use('/api/cashMovement', cashMovementRoutes)
+app.use('/api/cashRegister', cashRegister)

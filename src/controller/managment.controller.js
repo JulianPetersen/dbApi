@@ -1,11 +1,11 @@
   import Managment from '../models/managment'
   import { checkIfExistManagmentByDate,checkIsExistManagmentActive } from '../services/managment'
   import { diffHours, getArgentinaDayRange,toUTCfromArgentina,toArgentinaTime } from '../libs/dataHelper'
-
+  import CashRegister from "../models/cashRegister.js";
 
   export const createManagment = async (req, res) => {
   try {
-    const exsistManagmentToday = await checkIfExistManagmentByDate();
+    // 🕵️‍♂️ Verificar si ya existe una gestión activa hoy
     const existManagmentActive = await checkIsExistManagmentActive();
 
     if (existManagmentActive) {
@@ -14,38 +14,52 @@
       });
     }
 
-    // 🕓 Hora exacta del servidor al momento de ejecutar el endpoint
-    const now = new Date(); // startTime
-
-    // 📅 Día actual (medianoche) para el campo 'date'
+    // 🕓 Fecha y hora actual
+    const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-
-    // Tomamos resto del body (sin startTime ni date)
     const { userId, active } = req.body;
 
+    // 💰 Verificar si ya existe una caja para hoy
+    let existingCashRegister = await CashRegister.findOne({ date: startOfDay });
+    let isNewCashRegister = false; // 👈 bandera para saber si la caja fue creada ahora
+
+    // 📦 Si no existe, crear una nueva caja
+    if (!existingCashRegister) {
+      existingCashRegister = new CashRegister({
+        date: startOfDay,
+        openingAmount: 0,
+        currentAmount: 0,
+        openingUser: userId,
+        isClosed: false
+      });
+      await existingCashRegister.save();
+      isNewCashRegister = true;
+    }
+
+    // 🧾 Crear la gestión (turno)
     const newManagment = new Managment({
       userId,
-      startTime: now,        // hora exacta del servidor
-      date: startOfDay,      // medianoche del día actual
+      startTime: now,
+      date: startOfDay,
       active
     });
 
     const managmentSaved = await newManagment.save();
 
-    if (exsistManagmentToday) {
-      return res.status(200).json(managmentSaved);
-    } else {
-      return res.status(200).json({
-        managmentSaved,
-        message: 'Es la primera gestión del día. Se comenzará con una caja nueva.'
-      });
-    }
+    // 📤 Responder con mensaje correcto según el flujo
+    return res.status(200).json({
+      managmentSaved,
+      message: isNewCashRegister
+        ? 'Es la primera gestión del día. Se comenzó una caja nueva.'
+        : 'Gestión iniciada (ya existía caja del día).',
+      cashRegister: existingCashRegister
+    });
+
   } catch (err) {
+    console.error('Error en createManagment:', err);
     return res.status(400).json({ message: err.message });
   }
 };
-
-
 
 
 export const getAllManagments = async (req, res) => {

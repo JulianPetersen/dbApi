@@ -1,3 +1,5 @@
+import { Schema, model } from "mongoose";
+
 const cashMovementSchema = new Schema({
   cashRegister: {
     type: Schema.Types.ObjectId,
@@ -9,9 +11,14 @@ const cashMovementSchema = new Schema({
     ref: "User",
     required: true
   },
-  type: {
+  type: {   
     type: String,
-    enum: ["entrada", "salida"],
+    enum: ["ingreso", "egreso"],
+    required: true
+  },
+  methodOfPayment: {   
+    type: String,
+    enum: ["efectivo", "debito", 'transferencia'],
     required: true
   },
   concept: {
@@ -23,3 +30,6 @@ const cashMovementSchema = new Schema({
     required: true
   }
 }, { timestamps: true, versionKey: false });
+
+
+export default model("CashMovement", cashMovementSchema);
